@@ -257,5 +257,28 @@
 				"}", 		],
 			"description": "Create Lazy Load Adianti Framework"
 		},
+		"Script Javascript para Navegar com ENTER": {
+	 	"scope": "PHP,php",
+	 	"prefix": "newTSCript_ENTER",
+	 	"body": [ 
+			"TScript::create(\"$('body').on('keydown', 'input, select, textarea', function (e) {",
+			"                    var self = $(this),",
+			"                        form = self.parents('form:eq(0)'),",
+			"                     focusable, next;",
+			"    ",
+			"                    if (e.keyCode == 13) {",
+			"                        focusable = form.find('input,a,select,button,textarea').filter(':visible');",
+			"                        next = focusable.eq(focusable.index(this) + 1);",
+			"                        if (next.length) {",
+			"                            next.focus();",
+			"                        } else {",
+			"                            form.submit();",
+			"                        }",
+			"                    return false;",
+			"                    }",
+			"                 }\");"
+		],
+	 	"description": "Adiciona um TScript com função para navegar com ENTER até o último controle do Form"
+	 }
 
 }

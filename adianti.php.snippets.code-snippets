@@ -1,0 +1,261 @@
+{
+	"Incluir $this-> ": {
+		"scope": "PHP,php",
+		"prefix": "this.",
+		"body": ["$this->$1"],
+		"description": "Adicionar $this->"
+	},
+	
+	// Adianti Components 
+	"new TLabel ": {
+		"scope": "PHP,php",
+		"prefix": "newTLabel",
+		"body": ["$$1 = new TLabel('$2');"],
+		"description": "Adicionar TLabel"
+	},
+	"new TEntry ": {
+		"scope": "PHP,php",
+		"prefix": "newTEntry",
+		"body": ["$$1 = new TEntry('$1');"],
+		"description": "Adicionar TEntry"
+	},
+	"TNumeric ": {
+		"scope": "PHP,php",
+		"prefix": "newTNumeric",
+		"body": ["$$1 = new TNumeric('$1', 2, ',', '.', true);"],
+		"description": "New TNumeric"
+	},
+	"TDBUniqueSearch ": {
+		"scope": "PHP,php",
+		"prefix": "newTDBUniqueSearch",
+		"body": ["$$1 = new TDBUniqueSearch('$$1[]', BD, '$2', 'id', '$3');"],
+		"description": "New TDBUniqueSearch"
+	},
+
+	// Containers
+	"TVBox ": {
+		"scope": "PHP,php",
+		"prefix": "newTVBox",
+		"body": ["$$1 = new TVBox;",
+				 "$$1->style = 'width: 100%';",
+				 "$$1->add( $$2);"],
+		"description": "New TVBox"
+	},
+	"THBox ": {
+		"scope": "PHP,php",
+		"prefix": "newTHBox",
+		"body": ["$$1 = new THBox;",
+				 "$$1->style = 'width: 100%';",
+				 "$$1->add( $$2);"],
+		"description": "New TVBox"
+	},
+
+	// TSession
+	"TSession Get ": {
+		"scope": "PHP,php",
+		"prefix": "getTSession",
+		"body": ["$$1 = TSession::getValue('$2');"],
+		"description": "Session Get"
+	},
+	"TSession Set ": {
+		"scope": "PHP,php",
+		"prefix": "setTSession",
+		"body": ["TSession::setValue('$1', $$2);"],
+		"description": "Session Get"
+	},
+
+	// Transaction
+	"TTransaction Open/Close ": {
+		"scope": "PHP,php",
+		"prefix": "newTTransaction",
+		"body": ["TTransaction::open($1);",
+				 "$2",	
+				 "TTransaction::close();"],
+		"description": "TTransaction Open/Close"
+	},
+	"TTransaction Open/Close Try Exception ": {
+		"scope": "PHP,php",
+		"prefix": "newTryTransaction",
+		"body": [
+			"try",
+			"{",
+			"    TTransaction::open($1);",
+			"    $2",
+			"    TTransaction::close();",
+			"}",
+			"catch (Exception $$e)",
+			"{",
+			"    new TMessage('error', $$e->getMessage());",
+			"}"],
+			"description": "Session Get"
+		},
+
+		// Actions
+		"TAction ": {
+			"scope": "PHP,php",
+			"prefix": "newTAction",
+			"body": ["$$1 = new TAction([$$this, '$2'], ['register_state' => 'false']);"],
+			"description": "New TAction"
+		},
+		"TActionLink ": {
+			"scope": "PHP,php",
+			"prefix": "newTActionLink",
+			"body": ["$$1 = new TAction([$$this, '$2'], ['register_state' => 'false']);",
+					 "$$3 = new TActionLink('$4', $$1, '', null, null, 'far:check-circle green');"],
+			"description": "New TActionLink"
+		},
+		"TCriteria ": {
+			"scope": "PHP,php",
+			"prefix": "newTCriteria",
+			"body": ["$$1 = new TCriteria; ",
+					"$$1->add(new TFilter('$2', '=', $3)); "],
+			"description": "New TCriteria"
+		},
+
+		// Page
+		"TPage ": {
+			"scope": "PHP,php",
+			"prefix": "newTPage",
+			"body": ["class $1 extends TPage",
+					"{ ",
+					"   ",
+					"   function construct()",
+					"   {",
+					"       parent::__construct();",
+					" ",
+					"       $2",
+					"   }",
+					"}"],
+			"description": "New TPage"
+		},
+		
+		// Forms
+		"TBootstrapFormBuilder ": {
+			"scope": "PHP,php",
+			"prefix": "newBootstrapFormBuilder",
+			"body": ["class $1 extends TPage",
+ 					 "{ ",
+					 "    private $$form;   ",
+					 " ",
+					 "    function construct()",
+					 "    {",
+					 "        parent::__construct();",
+					 " ",
+					 "        $$this->form = new BootstrapFormBuilder('form_$1');",
+					 "        $$this->form->setFormTitle('$1 $2');",
+					 "        $$this->form->setFieldSizes('100%');",
+					 "        $$this->form->generateAria();",
+					 " ",
+					 "        $3",
+					 " ",
+					 "        $$vbox        = new TVBox;",
+					 "        $$vbox->style = 'width: 100%';",
+					 "        $$vbox->add($this->form); ",
+					 "        parent::add($vbox);",
+					 " ",
+					 "    }",
+					 "}"],
+			"description": "New BootstrapFormBuilder"
+		},
+
+		// Forms Methods 
+		"Form onSave ": {
+			"scope": "PHP,php",
+			"prefix": "newOnSaveMethod",
+			"body": [
+				"public function onSave( $$param )",
+				"{",
+				"    try",
+				"    {",
+				"        TTransaction::open($1); ",
+				" ",						
+				"        $$this->form->validate(); ",
+				"        $$data = $$this->form->getData(); ",
+				" ",		
+				"        $$object = new $2; " ,
+				"        $$object->fromArray( (array) $$data);" ,
+				"        $$object->store();   ",          
+				" ",		
+				"        $$data->id = $$object->id;",
+				" ",		
+				"        $$this->form->setData($$data);",
+				"        TTransaction::close(); ",
+				" ",		
+				"        new TMessage('info', AdiantiCoreTranslator::translate('Record saved'));",
+				"    }",
+				"    catch (Exception $$e) ",
+				"    {",
+				"        new TMessage('error', $$e->getMessage());" ,
+				"        $this->form->setData( $$this->form->getData() );" ,
+				"        TTransaction::rollback(); ",
+				"    }",
+				"}"
+			],
+			"description": "onSave Method"
+		},		
+
+		// Forms Methods 
+		"Form onEdit ": {
+			"scope": "PHP,php",
+			"prefix": "newOnEditMethod",
+			"body": [
+				"public function onEdit( $$param )",
+				"{",
+				"    try",
+				"    {",
+				"        if (isset($$param['key']))",
+				"        {",
+				"            $$key = $$param['key'];  ",
+				"            TTransaction::open($1); ",
+				"            $$object = new $2($$key);",
+				"            $$this->form->setData($$object); ",
+				"            TTransaction::close(); ",
+				"        }",
+				"        else",
+				"        {",
+				"            $$this->form->clear(TRUE);",
+				"        }",
+				"    }",
+				"    catch (Exception $$e) ",
+				"    {",
+				"        new TMessage('error', $$e->getMessage());" ,
+				"        TTransaction::rollback(); ",
+				"    }",
+				"}"
+			],
+			"description": "onEdit Method"
+		},	
+		
+		// Models
+		"Create Class": {
+			"scope": "PHP,php",
+			"prefix": "newClass",
+			"body": [
+			   "<?php",
+			   "class $1 extends TRecord",
+			   "{",
+			   "    const TABLENAME = '$2';",
+			   "    const PRIMARYKEY= 'id';",
+			   "    const IDPOLICY =  'max'; // {max, serial}",
+			   " ",	
+			   "    public function __construct($$id = NULL, $$callObjectLoad = TRUE)",
+			   "    {",
+			   "        parent::__construct($$id, $callObjectLoad);",
+			   "        parent::addAttribute('$3');",
+			   "    }",
+			   " ",
+			   "}",
+			],
+			"description": "Create Model Adianti Framework"
+		},
+		"Lazy load": {
+			"prefix": "newLazyLoad",
+			"body": [
+				"public function get_$1()",
+				"{",
+				"    return $2::find($this->$3);",
+				"}", 		],
+			"description": "Create Lazy Load Adianti Framework"
+		},
+
+}

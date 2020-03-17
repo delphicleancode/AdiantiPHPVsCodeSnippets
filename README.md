@@ -37,4 +37,6 @@ Exemplo de criação de Snippets:
 Utilização de um arquivo de snippet externo:
 
 Basta adicionar o(s) arquivo(s) de snippets no diretório de snippets do VSCode, exemplo:
-User\AppData\Roaming\Code\User\snippets
+User\AppData\Roaming\Code\User\snippets.
+
+Artigo completo em: https://link.medium.com/Gjm1OZR3V4 

@@ -1,0 +1,1513 @@
+{	
+	//Contrib. André Gasparin / Leondas Fernandes
+		
+	"setLogger": {
+		"prefix": "setLogger, reportLoggerSql",
+		"body": [
+            "TTransaction::setLogger(new TLoggerSTD); // standard output",
+            "//TTransaction::setLogger(new TLoggerTXT('log.txt')); // file",
+		],
+		"description": "setLogger"
+	},
+	"TChangeAction": {
+		"prefix": "TChangeAction",
+		"body": [
+			"// set exit action for input_exit",
+			"$$changeAction_$1 = new TAction(array($$this, 'onChange_$1'));",
+			"$${1:fieldChange}->setChangeAction($$changeAction_$1);",
+			"",
+			"/**",
+			"* Action to be executed when the user changes the combo_change field",
+			"*/",
+			"public static function onChange_$1($$param)",
+			"{",
+			"    if(!empty($$param['$1'])){",
+			"        TTransaction::open('database');",
+			"        $$options = ${2:model}::where('$1','=',$$param['$1'])->orderBy('nome')->getIndexedArray('id','nome');",
+			"        TCombo::reload($$param['_form_name'], '${3:fieldFill}', $$options, TRUE);",
+			"        TTransaction::close();",
+			"        ",
+			"        ",
+			"    }",
+			"}"
+		],
+		"description": "Create a change Action to fill TCombo"
+	},
+
+	// Adicinar opção ao combo e recarregar
+	"TAddOption": {
+		"prefix": "TAddOption",
+		"body": [
+			"$$add${1:fieldOption}_action = new TAction([$$this, 'onAdd$1']);",
+			"$$add$1_action->setParameters(['${2:fieldFilter}'=>$$2->getValue()]);",
+			"$$btn_add$1 = new TButton('btn_add$1');",
+			"$$btn_add$1->setAction( $$add$1_action, 'Adicionar');",
+			"$$btn_add$1->setImage('fa:plus');",
+			"/**",
+			" * Open an input dialog",
+			" */",
+			"public static function onAdd$1( $$param )",
+			"{",
+			"    if(!empty($$param['$2'])){",
+			"        $$form = new BootstrapFormBuilder('form_add$1');",
+			"        ",
+			"        $$nome= new TEntry('nome');",
+			"        $$nome->forceUpperCase();",
+			"        ",
+			"        $$form->addFields( [new TLabel('Nome')], [$$nome]);",
+			"        ",
+			"        $$actionSave$1 = new TAction([__CLASS__, 'onSave$1']);",
+			"        $$actionSave$1->setParameters(['$2' => $$param['$2']]);",
+			"        $$form->addAction('Salvar', $$actionSave$1, 'fa:save green');",
+			"        ",
+			"        // show the input dialog",
+			"        new TInputDialog('Adicionar $1', $$form);",
+			"    }",
+			"    else{",
+			"        new TMessage('info', 'Para adicionar uma ${6:optionAdd}, Selecione antes a ${7:optionNeeded}');",
+			"    }",
+			"}",
+			"",
+			"/**",
+			" * Show the input dialog data",
+			" */",
+			"public static function onSave$1( $$param )",
+			"{",
+			"    if(!empty($$param['nome'])){",
+			"        TTransaction::open('database');",
+			"        //var_dump($$param);",
+			"        $$object = new ${3:addModel}();",
+			"        $$object->ativo = 1;",
+			"        $$object->$2 = $$param['$2'];",
+			"        $$object->nome = $$param['nome'];",
+			"        $$object->store();",
+			"        ",
+			"        // reload TCombo",
+			"        $$options = ${3:addModel}::where('$2','=',$$param['$2'])->orderBy('nome')->getIndexedArray('id','nome');",
+			"        TCombo::reload('${4:formName}', '${5:fieldFill}', $$options, TRUE);",
+			"        ",
+			"        $$obj = new stdclass();",
+			"        $$obj->$5 = $$object->id;",
+			"        TForm::sendData('$4', $$obj);",
+			"        TTransaction::close();",
+			"        ",
+			"    }",
+			"}"
+		],
+		"description": "Create a change Action to fill TCombo"
+	},
+	"TFormBuilderBootstrapH": {
+		"prefix": "TFormBuilderBootstrapH",
+		"body": [
+			"// Create a BootstrapFormBuilder",
+			"$${1:form} = new BootstrapFormBuilder('${2:name}');",
+			"$${1:form}->setFormTitle('${3:Título}');",
+			"$${1:form}->generateAria();",
+			"// Create Fields and Elements",
+			"",
+			"",
+			"// Add fields and Elements to form",
+			"//$${1:form}->appendPage('Aba 1'); // Caso trabalhe com Abas",
+			"$$row = $${1:form}->addFields( [ new TLabel('${4:field}'), $$4], [ new TLabel('${5:field}'), $$5] );",
+			"$$row->layout = [ 'col-sm-6 control-label', 'col-sm-6'];",
+			"",
+			"// Add action to form",
+			"$${1:form}->addAction( 'Enviar', new TAction( [$$this, '${4:method}'] ), 'fa:save'); //addHeaderAction"
+		],
+		"description": "Create a BootstrapFormBuilder com Labels Horizontais"
+	},
+	"TFormBuilderBootstrapV": {
+		"prefix": "TFormBuilderBootstrapH",
+		"body": [
+			"// Create a BootstrapFormBuilder",
+			"$${1:form} = new BootstrapFormBuilder('${2:name}');",
+			"$${1:form}->setFormTitle('${3:Título}');",
+			"$${1:form}->setFieldSizes('100%'); // IMPORTANTE!!!",
+			"$${1:form}->generateAria();",
+			"// Create Fields and Elements",
+			"",
+			"",
+			"// Add fields and Elements to form",
+			"//$${1:form}->appendPage('Aba 1'); // Caso trabalhe com Abas",
+			"$$row = $${1:form}->addFields( [ new TLabel('${4:field}') ], [$$4] );",
+			"$$row->layout = [ 'col-sm-2 control-label', 'col-sm-10'];",
+			"",
+			"// Add action to form",
+			"$${1:form}->addAction( 'Enviar', new TAction( [$$this, '${4:method}'] ), 'fa:save'); //addHeaderAction"
+		],
+		"description": "Create a BootstrapFormBuilder com Labels Verticais"
+	},
+	"TFieldlist": {
+		"prefix": "TFieldlist",
+		"body": [
+			"// Create TFieldlist",
+			"$${1:fieldlist} = new TFieldList;",
+			"$${1:fieldlist}->generateAria();",
+			"$${1:fieldlist}->width = '100%';",
+			"",
+			"// Criar os campos que irão na fieldlist",
+			"$${2:field} = new TEntry('$2');",
+			"$${4:form}->addField( $$2 ); // adiciona campo à fieldlist",
+			"",
+			"// Add field to fieldlist",
+			"$${1:fieldlist}->addField( '<b>${3:header}</b>',  $$2,  [ 'width' => '25%'] ); // 'sum' => 'true' - soma a coluna",
+			"",
+			"//$${1:fieldlist}->enableSorting(); // Habilitar ordenação",
+			"",
+			"$${1:fieldlist}->addHeader(); // Adiciona o header da fieldlist",
+			"$${1:fieldlist}->addDetail( new stdClass ); //Adicina um detalhe a fieldlist",
+			"$${1:fieldlist}->addCloneAction(); // Adiciona a opção de adicionar item",
+			"",
+			"$${4:form}->addContent( [$${1:fieldlist}] ); // Adiciona a fieldlist ao form"
+		],
+		"description": "Create TFieldlist"
+	},
+	"TCheckList": {
+		"prefix": "TCheckList",
+		"body": [
+			"// Create CheckList",
+			"$${1:name} = new TCheckList('$1');",
+			"",
+			"$${1:name}->addColumn( '${2:field}','${3:header}','center','20%');",
+			"$${1:name}->addColumn( '${4:field}','${5:header}','center','80%');",
+			"$${1:name}->setHeight(250);",
+			"$${1:name}->makeScrollable();",
+			"",
+			"$${6:input_search_$1} = new TEntry('$6');",
+			"$$6->placeholder = 'Busca...';",
+			"$$6->setSize('100%');",
+			"",
+			"$${1:name}->enableSearch($$6, '$2, $4'); // para filtrar outros campos, inserir no enable",
+			"",
+			"$$hbox_$1 = new THBox;",
+			"$$hbox_$1->style = 'border-bottom:1px solid gray; padding-bottom:10px';",
+			"$$hbox_$1->add( new TLabel('${7:label}') );",
+			"$$hbox_$1->add($$6)->style = 'float:right; width:30%';",
+			"",
+			"$${8:form}->addContent( [$$hbox_$1] );",
+			"$${8:form}->addFields( [$${1}] );",
+			"",
+			"$${1:name}->addItems( ${9:model}::allInTransaction('${10:database}') );"
+		],
+		"description": "Create TCheckList"
+	},
+	// TTransaction
+	"TTransaction": {
+		"prefix": "TTransaction",
+		"body": [
+			"TTransaction::open('${1:database}');",
+			"$2",
+			"TTransaction::close();"
+		],
+		"description": "TTransaction open and close"
+	},
+	// TTransacrion com Try Catch
+	"TTransactionTryCatch": {
+		"prefix": "TTransactionTryCatch",
+		"body": [
+			"try",
+			"{",
+			"   TTransaction::open('${1:database}');",
+			"   $2",
+			"   TTransaction::close();",
+			"}",
+			"catch (Exception $$e)",
+			"{",
+			"   new TMessage('error', $$e->getMessage());",
+			"}",
+		],
+		"description": "TTransaction open and close with try and catch"
+	},
+	// TRepository
+	"TRepository": {
+		"prefix": "TRepository",
+		"body": [
+			"$$repository = new TRepository('${1:model}');",
+			"$${1:customers} = $$repository->load($$criteria);", 
+            "foreach ($${1:customers} as $${2:customer})",
+            "{", 
+                "echo $${2:customer}->id . ' - ' . $${2:customer}->name . '<br>';",
+            "}"
+		],
+		"description": "TRepository open a repository from model"
+	},
+	// TCriteria
+	"TCriteria": {
+		"prefix": "TCriteria",
+		"body": [
+			"$$criteria = new TCriteria;",
+			"$$criteria->add( new TFilter( '${1:field}', '${2:operator}', '${3:value}') ); // operator =, <, >, BETWEEN, IN, NOT IN, LIKE, IS NOT, colocar entre () o último comparador, gera uma subquery"
+		],
+		"description": "TCriteria and add a filter"
+	},
+	// TFilter
+	"TFilter": {
+		"prefix": "TFilter",
+		"body": [
+			"$$filter_${1:field} = new TFilter( '$1', '${2:operator}', '${3:value}') );  // operator =, <, >, BETWEEN, IN, NOT IN, LIKE, IS NOT"
+		],
+		"description": "TFilter and condicion"
+	},
+	// TAction	
+	"TAction": {
+		"prefix": "TAction",
+		"body": [
+			"$${1:name}= new TAction('$1', ['${2:key}' => '${3:value}']); // $1->setParameter('${2:key}' => '${3:value}');",
+		],
+		"description": "TAction('name')"
+	},
+	"TActionLink ": {
+		"scope": "PHP,php",
+		"prefix": "newTActionLink",
+		"body": ["$$1 = new TAction([$$this, '$2'], ['register_state' => 'false']);",
+				 "$$3 = new TActionLink('$4', $$1, '', null, null, 'far:check-circle green');"],
+		"description": "New TActionLink"
+	},
+	// Campo Calculado
+	"TCalc": {
+		"prefix": "TCalc",
+		"body": [
+			"// Campo Calculado",
+			"$${1:campo1} = (double) str_replace(',','.',str_replace('.', '', $$param['$1']));",
+			"$${2:campo2} = (double) str_replace(',','.',str_replace('.', '', $$param['$2']));",
+			"",
+			"$${3:resultado} = $$1 ${4:operador} $$2 ;",
+			"$$object = new stdClass();",
+			"$$object->$3 = number_format($$3, 2 , ',', '.');",
+			"",
+			"TForm::sendData(self::$$formName, $$object);"
+		],
+		"description": "TCalc calc fields"
+	},
+
+
+	"TMessage": {
+		"prefix": "TMessage",
+		"body": [
+			"new TMessage('${1:type}', '${2:message}'); //TAction $action = NULL, $title_msg",
+		],
+		"description": "TMessage"
+	},
+	"TAlert": {
+		"prefix": "TAlert",
+		"body": [
+			"new TAlert('${1:type}', '${2:message}');",
+		],
+		"description": "TAlert"
+	},
+	
+	"setExitAction": {
+		"prefix": "setExitAction",
+		"body": [
+			"setExitAction(new TAction([$$this, '${1:method}']));",
+			"// Create method $1",
+			"// copiar o trecho abaixo e colar antes do final da classe",
+			"public static function $1($$param){",
+			"   $$obj = new stdClass;",
+			"   $$obj->${2:field} = '${3:value}';",
+			"   TForm::sendData($${4:param['_form_name']}, $$obj); //$param['_form_name'] ou self::formname",
+			"}"
+		],
+		"description": "setExitAction"
+	},
+	"setChangeAction": {
+		"prefix": "setChangeAction",
+		"body": [
+			"setChangeAction(new TAction([$$this, '${1:method}']));",
+			"// create de method $1",
+			"// copiar o trecho abaixo e colar antes do final da classe",
+			"public static function $1($$param){",
+			"   TCombo::reload($${2:param['_form_name']}, '${3:field}', ${4:vetor}); // vetor de opções $param['_form_name'] ou self::formname",
+			"}"
+		],
+		"description": "setChangeAction"
+	}
+	,
+	"loadPage": {
+		"prefix": "loadPage",
+		"body": [
+			"//Carregar outro método (MetodoForm) com sua função (onReload) e enviar a array $1 como array para seu GET",
+			"TApplication::loadPage('MetodoForm', 'onReload', $${1:parametro});"
+
+		],
+		"description": "setChangeAction"
+	},
+	"UpdateUnicoCampo": {
+		"prefix": "UpdateUnicoCampo",
+		"body": [
+			"try",
+			"{",
+				"TTransaction::open(self::$$database);",
+				"Customer::where('${1:id}', '${2:IN}', ${3:[1,2,3,4]})",
+					"->where('${4:status}', '${5:=}', '${6:C}')",
+					"->set('${7:gender}', '${8:M}')",
+					"->update();",
+			"}",
+			"catch (Exception $e)",
+			"{",
+				"new TMessage('info', 'Records updated');",
+			"}",
+		],
+		"description": "Update em outra tabela (estático)"
+	},
+	"Static Select in other table": {
+		"prefix": "selectStatico",
+		"body": [
+		  "//Carrega um vetor indexado com todos produtos",
+		  "$${1:products} = {2:Product}::getIndexedArray('${3:id}', '${4:description}');",
+		  "var_dump($$1);",
+		  "//carrega um vetor indexado com todos produtos, utilizando mascaras",
+		  "$${1:products} = $2::getIndexedArray('key:{${3:id}}', 'description:{${4:description}}');",
+		  "//carrega um vetor indexado com os produtos filtrados e ordenados",
+		  "$${1:products} = $2::where('${5:unity}', '=', '${6:PC}')",
+		  "                     ->orderBy('${3:id}')",
+		  "                     ->getIndexeadArray('${3:id}', '${4:description}');",
+		  "var_dump($$1);",
+		  "// carrega um vetor indexado com os produtos filtrados e ordenados",
+		  "$${1:products} = $2::where('${3:id}', 'in', '${8:[1,2,3,4]}')",
+		  "                              ->orderBy('${3:id}')",
+		  "                              ->getIndexeadArray('${3:id}', '${4:description}');",
+		  "var_dump($$1);"
+		],
+		"description": "Select Estático em outra tabela"
+	  },
+	  
+	  "setTransformer": {
+		"prefix": "setTransformer",
+		"body": [
+			"$${1:coluna}->setTransformer(array($$this, 'Tansformer${2:funcao}'));",
+			"//Adicionar a função no final da classe",
+			"//public function format$2($$date, $$object, $$row)",
+			"//{",
+				"//Mudar estilo da linha",
+				"//$$row->style = \"background:#000000\"",
+				"//formatar para data",
+				"//$$date = TDate::date2br($$date);",
+				"//return  $$date;",
+			"//}"
+		],
+		"description": "Alterar conteúdo do campo do DATAGRID"
+	  },
+	  "setTransformerANONIMA": {
+		"prefix": "setTransformerANONIMA",
+		"body": [
+			"$${1:coluna}->setTransformer( function($$value, $$object, $$row) {",
+			"return TDate::date2br($$value);",
+			"});"
+		],
+		"description": "Alterar conteúdo do campo do DATAGRID com função anônima"
+	  },
+
+
+
+	  "TDataGridAction": {
+		"prefix": "TDataGridAction",
+		"body": [
+			"//$$action_on${1:NomeDaFuncao} = new TDataGridAction(['$2', 'onEdit'], ['id'=>'{id}', 'register_state' => 'false']);",
+			"$$action_on${1:NomeDaFuncao} = new TDataGridAction(array('${2:nomedaList}', 'on$1'));",
+			"$$action_on$1->setUseButton(false);",
+			"$$action_on$1->setButtonClass('btn btn-default btn-sm');",
+			"$$action_on$1->setLabel(\"${3:NomeDoBotao}\");",
+			"$$action_on$1->setImage('fas:${4:icone} ${5:cor}'); // edit #478fca | trash-alt #dd5a43",
+			"$$action_on$1->setField(self::$$primaryKey);",
+			"$$this->datagrid->addAction($$action_on$1);",
+			"//adicionar função no fim da classe",
+			"public function on$1($param = null) ",
+			"{",
+			"}",
+		],
+		"description": "Alterar conteúdo do campo do DATAGRID com função anônima"
+	  },
+	  "closeCortina": {
+		  "prefix": "closeCortina",
+		  "body": ["TScript::create(\"Template.closeRightPanel()\");"],
+		  "description": "Fechar a cortina, página de painel lateral."
+	  },
+	  
+	  "sqlManual": {
+		  "prefix": "sqlManual",
+		  "body": [
+			  "$$conn = TTransaction::get();",
+			  "$$result = $conn->query('SELECT ${1:campo} FROM  ${2:tabela} ORDER BY id');",
+			  "$$objects = $result->fetchAll(PDO::FETCH_CLASS, \"stdClass\");",
+			  "if($objects)",
+			  "{",
+				  "foreach($objects as $object) ",
+				  "{ ",
+					  "echo $object->id;",
+				  "} ",   
+			  "}"
+  
+		  ],
+		  "description": "Criar um sql manual."
+	  },
+  
+	  //INSERIR REGISTRO
+	  "InsertRegistry": {
+		  "prefix": "Inserir valor campo",
+		  "body": [
+			  "$$objeto = new Principal();",
+			  "    $$objeto->campo = 'valor';",
+			  "    $$objeto->store();"
+		  ],
+		  "description": "Inserir um valor de um campo do objeto no registro no banco de dados"
+	  },
+  
+	  "Pegar Registro unico": {
+		  "prefix": "Pegar Registro Unico",
+		  "body": [
+			  "\t//Pegar registro único",
+			  "\t$$objeto = Detalhe::find( $$id );"
+		  ],
+		  "description": "Pegar Registro único pelo id"
+	  },
+  
+	  "Pegar Primeiro Registro Where": {
+		  "prefix": "Pegar Registro Where",
+		  "body": [
+			  "\t//Pegar registro where",
+			  "\t$$objeto = Principal::where('coluna', '=', $$valor)->first();"
+		  ],
+		  "description": "Pegar o primeiro Registro utilizando o Where na consulta"
+	  },
+  
+		  "Pegar Registro e gravar uma coluna": {
+		  "prefix": "Pegar registro e gravar uma coluna",
+		  "body": [
+			  "//Pegar registro e salvar outra coluna",
+			  "    $$objeto = Principal::find( $$id );",
+			  "    if($$objeto)",
+			  "    {",
+			  "        $$objeto->coluna = 'valor';",
+			  "        $$objeto->store();    ",
+			  "\t}"
+		  ],
+		  "description": "Pegar Registro e gravar uma coluna"
+	  },
+	  
+	  "Deletar registro por id": {
+		  "prefix": "Deletar registro por id",
+		  "body": [
+			  "\t//Deletar registro por id",
+			  "    $$objeto = Principal::find( $$id );",
+			  "    if($$objeto)",
+			  "    {",
+			  "        $$objeto->delete();    ",
+			  "\t}"
+		  ],
+		  "description": "Deletar registro por id"
+	  },
+	  
+  
+	  "Objeto para array": {
+		  "prefix": "Objeto para array",
+		  "body": [
+			  "\t//OBjeto para array",
+			  "\t$$objeto = Detalhe::find( $$id );",
+			  "    if($$objeto)",
+			  "    {",
+			  "        $$array = $$objeto->toArray();    ",
+			  "\t}"
+		  ],
+		  "description": "Objeto para array"
+	  },
+	  
+	  "Objeto para Json": {
+		  "prefix": "Objeto para Json",
+		  "body": [
+			  "\t//Objeto em json\t",
+			  "    $$objeto = Principal::find( $$id );",
+			  "    if($$objeto)",
+			  "    {",
+			  "        $$array = $$objeto->toJson();    ",
+			  "    }"
+		  ],
+		  "description": "Objeto para Json"
+	  },
+  
+	  "Pegar Registro com filtro": {
+		  "prefix": "Pegar Registro com filtro",
+		  "body": [
+			  "\t//Objetos com filtro",
+			  "\t$$objs = Principal::where('coluna',  '=', $$valor)",
+			  "\t->where('coluna2', '=', $$valor2)",
+			  "\t->orderBy('id')",
+			  "\t->load(); //pode usar ->first(); ->last(); ->first(); ->take(10)->load();"
+		  ],
+		  "description": "Pegar Registro com filtro"
+	  },
+  
+	  "Alterar multiplos registros": {
+		  "prefix": "Alterar multiplos registros",
+		  "body": [
+			  "\t//Alterar multiplos registros",
+			  "\t    Principal::where('id', 'IN', [1,2,3,4]) // id in (1,2,3,4)",
+			  "            ->where('coluna1', '=', 'valor1') // coluna1 = 'valor1'",
+			  "            ->set('coluna2', '50') // set coluna2 = '50'",
+			  "            ->update();"
+		  ],
+		  "description": "Alterar multiplos registros"
+	  },
+  
+	  "Deletar multiplos registros": {
+		  "prefix": "Deletar multiplos registros",
+		  "body": [
+			  "\t//Deletar multiplos registros",
+			  "\tPrincipal::where('coluna',  '=', $$valor)",
+			  "\t\t\t->where('coluna2', '=', $$valor2)",
+			  "\t\t\t->delete();"
+		  ],
+		  "description": "Deletar multiplos registros"
+	  },
+		  "Count - Contar registros": {
+		  "prefix": "Count - Contar registros",
+		  "body": [
+			  "//Count - Contar registros",
+			  "\t$$count = Principal::where('coluna',  '=', $$valor)",
+			  "                      ->where('coluna2', '=', $$valor2)",
+			  "                      ->count();"
+		  ],
+		  "description": "Count - Contar registros"
+	  },
+	  "Lista de funcoes": {
+		"prefix": "Lista de Funcoes",
+		"body": [
+			" https://www.adianti.com.br/framework_files/adianti_framework.pdf",
+		],
+		"description": "Lista de Funcoes"
+		},
+		"print_r": {
+			"prefix": "print_r",
+			"body": [
+				" echo '<pre>'; ",
+				" print_r($$1); ",
+				" echo '</pre>'; "
+			],
+			"description": "print_r"
+			},	
+
+		"dateNowPhp": {
+        "prefix": "dateNowPhp",
+        "body": [
+            "date(\"Y-m-d H:i:s\");"
+        ],
+        "description": "dateNowPhp"
+	},
+	
+	//Fields types
+
+	"TEntry": {
+		"prefix": "TEntry",
+		"body": [
+			"$${1:name}= new TEntry('$1');"
+		],
+		"description": "TEntry('name')"
+	},
+	"TNumeric": {
+		"prefix": "TNumeric",
+		"body": [
+			"$${1:name}= new TNumeric('$1');"
+		],
+		"description": "TNumeric('name')"
+	},
+	"TCombo": {
+		"prefix": "TCombo",
+		"body": [
+			"$${1:name}= new TCombo('$1');",
+			"//$$1->addItems(['1'=>'Sim', '0' => 'Não']);"
+		],
+		"description": "TCombo('name')"
+	},
+	"TSelect": {
+		"prefix": "TSelect",
+		"body": [
+			"$${1:name}= new TSelect('$1');",
+			"//$$1->addItems(['1'=>'Sim', '0' => 'Não']);"
+		],
+		"description": "TSelect seleção múltipla"
+	},
+	"TRadioGroup": {
+		"prefix": "TRadioGroup",
+		"body": [
+			"$${1:name}= new TRadioGroup('$1');",
+			"$$1->setLayout('horizontal'); //vertical",
+			"//$$1->addItems(['1'=>'Sim', '0' => 'Não']);"
+		],
+		"description": "TRadioGroup('name')"
+	},
+	"TCheckGroup": {
+		"prefix": "TCheckGroup",
+		"body": [
+			"$${1:name}= new TCheckGroup('$1');",
+			"$$1->setLayout('horizontal'); //vertical",
+			"//$$1->addItems(['1'=>'Sim', '0' => 'Não']);"
+		],
+		"description": "TCheckGroup('name')"
+	},
+	"TDate": {
+		"prefix": "TDate",
+		"body": [
+			"$${1:name}= new TDate('$1');",
+		],
+		"description": "TDateTime('name')"
+	},
+	"TDateTime": {
+		"prefix": "TDateTime",
+		"body": [
+			"$${1:name}= new TDateTime('$1');",
+			"// setMask para o campo e para o banco de dados",
+			"$$1->setMask('dd/mm/yyyy hh:ii');",
+			"$$1->setDatabaseMask('yyyy-mm-dd hh:ii');"
+		],
+		"description": "TDateTime('name')"
+	},
+	"TPassword": {
+		"prefix": "TPassword",
+		"body": [
+			"$${1:name}= new TPassword('$1');"
+		],
+		"description": "TPassword('name')"
+	},
+	"TColor": {
+		"prefix": "TColor",
+		"body": [
+			"$${1:name}= new TColor('$1');"
+		],
+		"description": "TColor('name')"
+	},
+	"TSpinner": {
+		"prefix": "TSpinner",
+		"body": [
+			"$${1:name}= new TSpinner('$1');"
+		],
+		"description": "TSpinner('name')"
+	},
+	"TText": {
+		"prefix": "TText",
+		"body": [
+			"$${1:name}= new TText('$1');"
+		],
+		"description": "TText('name')"
+	},
+	"TMultiEntry": {
+		"prefix": "TMultiEntry",
+		"body": [
+			"$${1:name}= new TMultiEntry('$1');"
+		],
+		"description": "TMultiEntry seleção múltipla"
+	},
+	"TMultiSearch": {
+		"prefix": "TMultiSearch",
+		"body": [
+			"$${1:name}= new TMultiSearch('$1');",
+			"//$$1->addItems(['1'=>'Sim', '0' => 'Não']);"
+		],
+		"description": "TMultiSearch seleção múltipla"
+	},
+	"TUniqueSearch": {
+		"prefix": "TUniqueSearch",
+		"body": [
+			"$${1:name}= new TUniqueSearch('$1');",
+			"//$$1->addItems(['1'=>'Sim', '0' => 'Não']);"
+		],
+		"description": "TUniqueSearch"
+	},
+	"TFile": {
+		"prefix": "TFile",
+		"body": [
+			"$${1:name}= new TFile('$1');",
+			"//$$1->setAllowedExtensions(['jpg', 'jpeg', 'png']);"
+		],
+		"description": "TFile seleção múltipla"
+	},
+	"TMultiFile": {
+		"prefix": "TMultiFile",
+		"body": [
+			"$${1:name}= new TMultiFile('$1');",
+			"//$$1->setAllowedExtensions(['jpg', 'jpeg', 'png']);"
+		],
+		"description": "TMultiFile seleção múltipla"
+	},
+	"THtmlEditor": {
+		"prefix": "THtmlEditor",
+		"body": [
+			"$${1:name}= new THtmlEditor('$1');"
+		],
+		"description": "THtmlEditor('name')"
+	},
+	"TDBUniqueSearch": {
+		"prefix": "TDBUniqueSearch",
+		"body": [
+			"$${1:name} = new TDBUniqueSearch('$1', '${2:database}', '${3:model}', '${4:key}', '${5:value}'); //TCriteria $criteria = NULL"
+		],
+		"description": "TDBUniqueSearch('name', 'database', 'model', 'key', 'value')"
+	},
+	"TDBCheckGroup": {
+		"prefix": "TDBCheckGroup",
+		"body": [
+			"$${1:name} = new TDBCheckGroup('${1:name}', '${2:database}', '${3:model}', '${4:key}', '${5:value}', '$5'); //TCriteria $criteria = NULL"		],
+		"description": "TDBCheckGroup('name', 'database', 'model', 'key', 'value')"
+	},
+	"TDBCheckList": {
+		"prefix": "TDBCheckList",
+		"body": [
+			"$${1:name} = new TDBCheckList('${1:name}', '${2:database}', '${3:model}', '${4:key}', '${5:value}', '$5'); //TCriteria $criteria = NULL"
+		],
+		"description": "TDBCheckList('name', 'database', 'model', 'key', 'value')"
+	},
+	"TDBCombo": {
+		"prefix": "TDBCombo",
+		"body": [
+			"$${1:name} = new TDBCombo('${1:name}', '${2:database}', '${3:model}', '${4:key}', '${5:value}', '$5'); //TCriteria $criteria = NULL"
+		],
+		"description": "TDBCombo('name', 'database', 'model', 'key', 'value')"
+	},
+	"TDBEntry": {
+		"prefix": "TDBEntry",
+		"body": [
+			"$${1:name} = new TDBEntry('${1:name}', '${2:database}', '${3:model}', '${4:value}', '$4'); //TCriteria $criteria = NULL"
+		],
+		"description": "TDBEntry('name', 'database', 'model', 'value')"
+	},
+	"TDBMultiSearch": {
+		"prefix": "TDBMultiSearch",
+		"body": [
+			"$${1:name} = new TDBMultiSearch('${1:name}', '${2:database}', '${3:model}', '${4:key}', '${5:value}', '$5'); //TCriteria $criteria = NULL"
+		],
+		"description": "TDBMultiSearch('name', 'database', 'model', 'key', 'value')"
+	},
+	"TDBRadioGroup": {
+		"prefix": "TDBRadioGroup",
+		"body": [
+			"$${1:name} = new TDBRadioGroup('${1:name}', '${2:database}', '${3:model}', '${4:key}', '${5:value}', '$5'); //TCriteria $criteria = NULL"
+		],
+		"description": "TDBRadioGroup('name', 'database', 'model', 'key', 'value')"
+	},
+	"TDBSelect": {
+		"prefix": "TDBSelect",
+		"body": [
+			"$${1:name} = new TDBSelect('${1:name}', '${2:database}', '${3:model}', '${4:key}', '${5:value}', '$5') //TCriteria $criteria = NULL"
+		],
+		"description": "TDBSelect('name', 'database', 'model', 'key', 'value')"
+	},
+	"TDBSortList": {
+		"prefix": "TDBSortList",
+		"body": [
+			"$${1:name} = new TDBSortList('${1:name}', '${2:database}', '${3:model}', '${4:key}', '${5:value}', '$5') //TCriteria $criteria = NULL"
+		],
+		"description": "TDBSortList('name', 'database', 'model', 'key', 'value')"
+	},
+	
+	"TDBSeekButton": {
+		"prefix": "TDBSeekButton",
+		"body": [
+			"$${1:name} = new TDBSeekButton('${1:name}', '${2:database}', '${3:form}', '${4:model}', '${5:display_field}', ${6:receive_key} = null, ${7:receive_display_field} = null); //TCriteria $criteria = NULL"
+		],
+		"description": "TDBSeekButton('name', 'database', 'model', 'key', 'value')"
+	},
+
+    "TEntry (Full)": {
+		"prefix": "TEntry (Full)",
+		"body": [
+			"$${1:name}= new TEntry('$1');",
+			"// configurações do campo",
+			"//$$1->setNumericMask(2, ',', '.', true);", // Caso seja campo numérico
+			"//$$1->setMask('AAA-9999', true);", // Caso campo possua alguma máscara. true retira a máscara ao salvar
+			"//$$1->forceUpperCase();", // Força letra maiúscula. forceLowerCase para minúsculo
+			"//$$1->setCompletion([]);", // Passa um vetor para auto completar
+			"//$$1->setEditable(FALSE);", // Desabilita a edição do campo
+			"//$$1->addValidation('$1', new TRequiredValidator);", // Passa um vetor para auto completar
+			"//$$1->placeholder = 'Digite aqui a descrição';",
+			"//$$1->setTip('Digite aqui a descrição');",
+			"$$1->setSize('100%'); //px",
+			"// Adicionar field to $$this->form",
+        	"$$row = $$this->form->addFields( [ new TLabel('$1') , $$1 ] );",
+			"$$row->layout = [ 'col-sm-12'];"
+		],
+		"description": "TEntry('name')"
+	},
+	"TNumeric (Full)": {
+		"prefix": "TNumeric (Full)",
+		"body": [
+			"$${1:name}= new TNumeric('$1');",
+			"//$$1->setEditable(FALSE);", // Desabilita a edição do campo
+			"//$$1->addValidation('$1', new TRequiredValidator);", // Passa um vetor para auto completar
+			"//$$1->placeholder = 'Digite aqui a descrição';",
+        	"//$$1->setTip('Digite aqui a descrição');",
+			"$$1->setSize('100%'); // setSize tamanho do campo px",
+        	"$$row = $$this->form->addFields( [ new TLabel('$1') , $$1 ] );",
+			"$$row->layout = [ 'col-sm-12'];"
+		],
+		"description": "TNumeric('name')"
+	},
+	"TCombo (Full)": {
+		"prefix": "TCombo (Full)",
+		"body": [
+			"$${1:name}= new TCombo('$1');",
+			"//$$1->addItems(['1'=>'Sim', '0' => 'Não']);",
+			"//$$1->setValue(1);",
+			"//$$1->enableSearch();",
+			"//$$1->setEditable(FALSE);", // Desabilita a edição do campo
+			"//$$1->addValidation('$1', new TRequiredValidator);", // Passa um vetor para auto completar
+        	"//$$1->setTip('Selecione uma opção');",
+			"$$1->setSize('100%'); //px",
+        	"$$row = $$this->form->addFields( [ new TLabel('$1') , $$1 ] );",
+			"$$row->layout = [ 'col-sm-12'];"
+		],
+		"description": "TCombo('name')"
+	},
+	"TSelect (Full)": {
+		"prefix": "TSelect (Full)",
+		"body": [
+			"$${1:name}= new TSelect('$1');",
+			"//$$1->addItems(['1'=>'Sim', '0' => 'Não']);",
+			"//$$1->setDefaultOption(1);",
+			"//$$1->setValue(['1']); //vetor",
+			"//$$1->setEditable(FALSE);", // Desabilita a edição do campo
+			"//$$1->addValidation('$1', new TRequiredValidator);", // Passa um vetor para auto completar
+        	"//$$1->setTip('Selecione uma opção');",
+			"$$1->setSize('100%'); //px",
+        	"$$row = $$this->form->addFields( [ new TLabel('$1') , $$1 ] );",
+			"$$row->layout = [ 'col-sm-12'];"
+		],
+		"description": "TSelect seleção múltipla"
+	},
+	"TRadioGroup (Full)": {
+		"prefix": "TRadioGroup (Full)",
+		"body": [
+			"$${1:name}= new TRadioGroup('$1');",
+			"$$1->setLayout('horizontal'); //vertical",
+			"//$$1->setUseButton(); //show as button",
+        	"//$$1->setTip('Selecione uma opção');",
+			"//$$1->addItems(['1'=>'Sim', '0' => 'Não']);",
+			"//$$1->setValue(1);",
+			"//$$1->setEditable(FALSE);", // Desabilita a edição do campo
+			"//$$1->addValidation('$1', new TRequiredValidator);", // Passa um vetor para auto completar
+			"$$1->setSize('100%'); //px",
+        	"$$row = $$this->form->addFields( [ new TLabel('$1') , $$1 ] );",
+			"$$row->layout = [ 'col-sm-12'];"
+		],
+		"description": "TRadioGroup('name')"
+	},
+	"TCheckGroup (Full)": {
+		"prefix": "TCheckGroup (Full)",
+		"body": [
+			"$${1:name}= new TCheckGroup('$1');",
+			"$$1->setLayout('horizontal'); //vertical",
+			"//$$1->setUseButton(); //show as button",
+        	"//$$1->setTip('Selecione uma opção');",
+			"//$$1->addItems(['1'=>'Sim', '0' => 'Não']);",
+			"//$$1->setValue(['1']); // vetor",
+			"//$$1->setEditable(FALSE);", // Desabilita a edição do campo
+			"//$$1->addValidation('$1', new TRequiredValidator);", // Passa um vetor para auto completar
+			"$$1->setSize('100%'); //px",
+        	"$$row = $$this->form->addFields( [ new TLabel('$1') , $$1 ] );",
+			"$$row->layout = [ 'col-sm-12'];"
+		],
+		"description": "TCheckGroup('name')"
+	},
+	"TDate (Full)": {
+		"prefix": "TDate (Full)",
+		"body": [
+			"$${1:name}= new TDate('$1');",
+			"// setMask para o campo e para o banco de dados",
+			"$$1->setMask('dd/mm/yyyy');",
+			"$$1->setDatabaseMask('yyyy-mm-dd');",
+			"$$1->setValue( date('Y-m-d') );",
+			"//$$1->placeholder = 'Digite aqui a descrição';",
+        	"//$$1->setTip('Digite aqui a descrição');",
+			"//$$1->setEditable(FALSE);", // Desabilita a edição do campo
+			"//$$1->addValidation('$1', new TRequiredValidator);", // Passa um vetor para auto completar
+			"$$1->setSize('100%'); //px",
+        	"$$row = $$this->form->addFields( [ new TLabel('$1') , $$1 ] );",
+			"$$row->layout = [ 'col-sm-12'];"
+		],
+		"description": "TDateTime('name')"
+	},
+	"TDateTime (Full)": {
+		"prefix": "TDateTime (Full)",
+		"body": [
+			"$${1:name}= new TDateTime('$1');",
+			"// setMask para o campo e para o banco de dados",
+			"$$1->setMask('dd/mm/yyyy hh:ii');",
+			"$$1->setDatabaseMask('yyyy-mm-dd hh:ii');",
+			"$$1->setValue( date('Y-m-d H:i') );",
+			"//$$1->placeholder = 'Digite aqui a descrição';",
+        	"//$$1->setTip('Digite aqui a descrição');",
+			"//$$1->setEditable(FALSE);", // Desabilita a edição do campo
+			"//$$1->addValidation('$1', new TRequiredValidator);", // Passa um vetor para auto completar
+			"$$1->setSize('100%'); //px",
+        	"$$row = $$this->form->addFields( [ new TLabel('$1') , $$1 ] );",
+			"$$row->layout = [ 'col-sm-12'];"
+		],
+		"description": "TDateTime('name')"
+	},
+	"TPassword (Full)": {
+		"prefix": "TPassword (Full)",
+		"body": [
+			"$${1:name}= new TPassword('$1');",
+        	"//$$1->setTip('Digite aqui a sua senha.');",
+			"//$$1->setEditable(FALSE);", // Desabilita a edição do campo
+			"//$$1->addValidation('$1', new TRequiredValidator);", // Passa um vetor para auto completar
+			"$$1->setSize('100%'); //px",
+        	"$$row = $$this->form->addFields( [ new TLabel('$1') , $$1 ] );",
+			"$$row->layout = [ 'col-sm-12'];"
+		],
+		"description": "TPassword('name')"
+	},
+	"TColor (Full)": {
+		"prefix": "TColor (Full)",
+		"body": [
+			"$${1:name}= new TColor('$1');",
+			"//$$1->setEditable(FALSE);", // Desabilita a edição do campo
+			"//$$1->addValidation('$1', new TRequiredValidator);", // Passa um vetor para auto completar
+        	"//$$1->setTip('Selecione a cor');",
+			"$$1->setSize('100%'); //px",
+        	"$$row = $$this->form->addFields( [ new TLabel('$1') , $$1 ] );",
+			"$$row->layout = [ 'col-sm-12'];"
+		],
+		"description": "TColor('name')"
+	},
+	"TSpinner (Full)": {
+		"prefix": "TSpinner (Full)",
+		"body": [
+			"$${1:name}= new TSpinner('$1');",
+			
+        	"$$1->setRange(1, 100, 1); // início, fim, passo",
+			"//$$1->setEditable(FALSE);", // Desabilita a edição do campo
+			"//$$1->addValidation('$1', new TRequiredValidator);", // Passa um vetor para auto completar
+        	"//$$1->setTip('Selecione o valor');",
+			"$$1->setSize('100%'); //px",
+        	"$$row = $$this->form->addFields( [ new TLabel('$1') , $$1 ] );",
+			"$$row->layout = [ 'col-sm-12'];"
+		],
+		"description": "TSpinner('name')"
+	},
+	"TText (Full)": {
+		"prefix": "TText (Full)",
+		"body": [
+			"$${1:name}= new TText('$1');",
+			"//$$1->setEditable(FALSE);", // Desabilita a edição do campo
+			"//$$1->addValidation('$1', new TRequiredValidator);", // Passa um vetor para auto completar
+			"//$$1->placeholder = 'Digite aqui a descrição';",
+        	"//$$1->setTip('Digite aqui a descrição');",
+			"$$1->setSize('100%'); //px",
+        	"$$row = $$this->form->addFields( [ new TLabel('$1') , $$1 ] );",
+			"$$row->layout = [ 'col-sm-12'];"
+		],
+		"description": "TText('name')"
+	},
+	"TButton (Full)": {
+		"prefix": "TButton (Full)",
+		"body": [
+			"$${1:name} = new TButton('$1');",
+			"$$1->setAction( new TAction( [$$this, '${2:method}']), '${3:label}');",
+			"$$1->setImage('fa:save');"
+		],
+		"description": "TButton('name')"
+	},
+	"TMultiEntry (Full)": {
+		"prefix": "TMultiEntry (Full)",
+		"body": [
+			"$${1:name}= new TMultiEntry('$1');",
+			"//$$1->setMaxSize(3); // Tamanho máximo das tags",
+			"//$$1->setValue(['1']); //vetor",
+			"//$$1->setEditable(FALSE);", // Desabilita a edição do campo
+			"//$$1->addValidation('$1', new TRequiredValidator);", // Passa um vetor para auto completar
+        	"//$$1->setTip('Selecione uma opção');",
+			"$$1->setSize('100%'); //px",
+        	"$$row = $$this->form->addFields( [ new TLabel('$1') , $$1 ] );",
+			"$$row->layout = [ 'col-sm-12'];"
+		],
+		"description": "TMultiEntry seleção múltipla"
+	},
+	"TMultiSearch (Full)": {
+		"prefix": "TMultiSearch (Full)",
+		"body": [
+			"$${1:name}= new TMultiSearch('$1');",
+			"//$$1->addItems(['1'=>'Sim', '0' => 'Não']);",
+			"//$$1->setDefaultOption(1);",
+			"//$$1->setMinLength(1);",
+			"//$$1->setValue(['1']); //vetor",
+			"//$$1->setEditable(FALSE);", // Desabilita a edição do campo
+			"//$$1->addValidation('$1', new TRequiredValidator);", // Passa um vetor para auto completar
+        	"//$$1->setTip('Selecione uma opção');",
+			"$$1->setSize('100%'); //px",
+        	"$$row = $$this->form->addFields( [ new TLabel('$1') , $$1 ] );",
+			"$$row->layout = [ 'col-sm-12'];"
+		],
+		"description": "TMultiSearch seleção múltipla"
+	},
+	"TUniqueSearch (Full)": {
+		"prefix": "TUniqueSearch (Full)",
+		"body": [
+			"$${1:name}= new TUniqueSearch('$1');",
+			"//$$1->addItems(['1'=>'Sim', '0' => 'Não']);",
+			"//$$1->setMinLength(1);",
+			"//$$1->setValue(['1']); //vetor",
+			"//$$1->setEditable(FALSE);", // Desabilita a edição do campo
+			"//$$1->addValidation('$1', new TRequiredValidator);", // Passa um vetor para auto completar
+        	"//$$1->setTip('Selecione uma opção');",
+			"$$1->setSize('100%'); //px",
+        	"$$row = $$this->form->addFields( [ new TLabel('$1') , $$1 ] );",
+			"$$row->layout = [ 'col-sm-12'];"
+		],
+		"description": "TUniqueSearch"
+	},
+	"TFile (Full)": {
+		"prefix": "TFile (Full)",
+		"body": [
+			"$${1:name}= new TFile('$1');",
+			"//$$1->setAllowedExtensions(['jpg', 'jpeg', 'png']);",
+			"//$$1->setEditable(FALSE);", // Desabilita a edição do campo
+			"//$$1->addValidation('$1', new TRequiredValidator);", // Passa um vetor para auto completar
+        	"//$$1->setTip('Selecione um arquivo');",
+			"$$1->setSize('100%'); //px",
+        	"$$row = $$this->form->addFields( [ new TLabel('$1') , $$1 ] );",
+			"$$row->layout = [ 'col-sm-12'];"
+		],
+		"description": "TFile seleção múltipla"
+	},
+	"TMultiFile (Full)": {
+		"prefix": "TMultiFile (Full)",
+		"body": [
+			"$${1:name}= new TMultiFile('$1');",
+			"//$$1->setAllowedExtensions(['jpg', 'jpeg', 'png']);",
+			"//$$1->setEditable(FALSE);", // Desabilita a edição do campo
+			"//$$1->addValidation('$1', new TRequiredValidator);", // Passa um vetor para auto completar
+        	"//$$1->setTip('Selecione os arquivos');",
+			"$$1->setSize('100%'); //px",
+        	"$$row = $$this->form->addFields( [ new TLabel('$1') , $$1 ] );",
+			"$$row->layout = [ 'col-sm-12'];"
+		],
+		"description": "TMultiFile seleção múltipla"
+	},
+	"THtmlEditor (Full)" : {
+		"prefix": "THtmlEditor (Full)",
+		"body": [
+			"$${1:name}= new THtmlEditor('$1');",
+			"$$1->setSize('100%', 200); //px",
+			"//$$1->setEditable(FALSE);", // Desabilita a edição do campo
+			"//$$1->addValidation('$1', new TRequiredValidator);", // Passa um vetor para auto completar
+			"$$1->placeholder = 'Digite aqui a descrição';",
+        	"$$1->setTip('Digite aqui a descrição');",
+        	"$$row = $$this->form->addFields( [ new TLabel('$1') , $$1 ] );",
+			"$$row->layout = [ 'col-sm-12'];"
+		],
+		"description": "THtmlEditor('name')"
+	},
+	"TSortList - Lista ordenável": {
+		"prefix": "TSortList",
+		"body": [
+			"$${1:name}= new TSortList('$1');",
+			"$$1->setSize('200',100); //px",
+			"//$$1->setTip('Digite aqui a descrição');",
+			"//$$1->setEditable(FALSE);", // Desabilita a edição do campo
+			"//$$1->addValidation('$1', new TRequiredValidator);", // Passa um vetor para auto completar
+			"// Adicionar field to $$this->form",
+        	"$$row = $$this->form->addFields( [ new TLabel('$1') , $$1 ] );",
+			"$$row->layout = [ 'col-sm-12'];"
+		],
+		"description": "TSortList('name')"
+	},
+	"TSortListConnected - Lista ordenável Conectada": {
+		"prefix": "TSortListConnected",
+		"body": [
+			"$${1:nome_list1}= new TSortList('$1');",
+			"$${2:nome_list2}= new TSortList('$2');",
+			"$$1->setSize('200',100); //px",
+			"$$2->setSize('200',100); //px",
+			"//$$1->setTip('Digite aqui a descrição');",
+			"//$$2->setTip('Digite aqui a descrição');",
+			"//$$1->setEditable(FALSE);", // Desabilita a edição do campo
+			"//$$1->addValidation('$1', new TRequiredValidator);", // Passa um vetor para auto completar
+			"//$$2->setEditable(FALSE);", // Desabilita a edição do campo
+			"//$$2->addValidation('$2', new TRequiredValidator);", // Passa um vetor para auto completar
+			"// Conectar Listas",
+			"$$1->connectList($$2);",
+			"$$2->connectList($$1);",
+			"// Adicionar field to $$this->form",
+        	"$$row = $$this->form->addFields( [ new TLabel('$1') , $$1 ], [ new TLabel('$1') , $$1 ] );",
+			"$$row->layout = [ 'col-sm-6', 'col-sm-6'];"
+		],
+		"description": "TSortList('name')"
+	},
+	// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	// Fiels with DB
+	// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	// ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+	// "setSize": {
+	// 	"prefix": "setSize",
+	// 	"body": [
+	// 		"setSize($1, $2);"
+	// 	],
+	// 	"description": "setSize(width, lenght)"
+	// }
+	"TDBUniqueSearch (Full)": {
+		"prefix": "TDBUniqueSearch (Full)",
+		"body": [
+			"$${1:name} = new TDBUniqueSearch('$1', '${2:database}', '${3:model}', '${4:key}', '${5:value}'); //TCriteria $criteria = NULL",
+			"$$1->setMask('{$5}'); // Máscara de exibição",
+			"$$1->setSize('100%'); //px",
+			"//$$1->placeholder = 'Digite aqui a descrição';",
+        	"//$$1->setTip('Digite aqui a descrição');",
+			"//$$1->setEditable(FALSE);", // Desabilita a edição do campo
+			"//$$1->addValidation('$1', new TRequiredValidator);", // Passa um vetor para auto completar
+        	"$$row = $$this->form->addFields( [ new TLabel('$1') , $$1 ] );",
+			"$$row->layout = [ 'col-sm-12'];"
+		],
+		"description": "TDBUniqueSearch('name', 'database', 'model', 'key', 'value')"
+	},
+	"TDBCheckGroup (Full)": {
+		"prefix": "TDBCheckGroup (Full)",
+		"body": [
+			"$${1:name} = new TDBCheckGroup('${1:name}', '${2:database}', '${3:model}', '${4:key}', '${5:value}', '$5'); //TCriteria $criteria = NULL",
+			"$$1->setMask('{$5}'); // Máscara de exibição",
+			"$$1->setSize('100%'); //px",
+			"//$$1->placeholder = 'Digite aqui a descrição';",
+        	"//$$1->setTip('Digite aqui a descrição');",
+			"//$$1->setEditable(FALSE);", // Desabilita a edição do campo
+			"//$$1->addValidation('$1', new TRequiredValidator);", // Passa um vetor para auto completar
+        	"$$row = $$this->form->addFields( [ new TLabel('$1') , $$1 ] );",
+			"$$row->layout = [ 'col-sm-12'];"
+		],
+		"description": "TDBCheckGroup('name', 'database', 'model', 'key', 'value')"
+	},
+	"TDBCheckList (Full)": {
+		"prefix": "TDBCheckList (Full)",
+		"body": [
+			"$${1:name} = new TDBCheckList('${1:name}', '${2:database}', '${3:model}', '${4:key}', '${5:value}', '$5'); //TCriteria $criteria = NULL",
+			"$$1->setMask('{$5}'); // Máscara de exibição",
+			"$$1->setSize('100%'); //px",
+			"//$$1->placeholder = 'Digite aqui a descrição';",
+        	"//$$1->setTip('Digite aqui a descrição');",
+			"//$$1->setEditable(FALSE);", // Desabilita a edição do campo
+			"//$$1->addValidation('$1', new TRequiredValidator);", // Passa um vetor para auto completar
+        	"$$row = $$this->form->addFields( [ new TLabel('$1') , $$1 ] );",
+			"$$row->layout = [ 'col-sm-12'];"
+		],
+		"description": "TDBCheckList('name', 'database', 'model', 'key', 'value')"
+	},
+	"TDBCombo (Full)": {
+		"prefix": "TDBCombo (Full)",
+		"body": [
+			"$${1:name} = new TDBCombo('${1:name}', '${2:database}', '${3:model}', '${4:key}', '${5:value}', '$5'); //TCriteria $criteria = NULL",
+			"$$1->setMask('{$5}'); // Máscara de exibição",
+			"$$1->setSize('100%'); //px",
+			"//$$1->enableSearch();",
+        	"$$1->setTip('Selecione uma opção');",
+			"//$$1->setEditable(FALSE);", // Desabilita a edição do campo
+			"//$$1->addValidation('$1', new TRequiredValidator);", // Passa um vetor para auto completar
+        	"$$row = $$this->form->addFields( [ new TLabel('$1') , $$1 ] );",
+			"$$row->layout = [ 'col-sm-12'];"
+		],
+		"description": "TDBCombo('name', 'database', 'model', 'key', 'value')"
+	},
+	"TDBEntry (Full)": {
+		"prefix": "TDBEntry (Full)",
+		"body": [
+			"$${1:name} = new TDBEntry('${1:name}', '${2:database}', '${3:model}', '${4:value}', '$4'); //TCriteria $criteria = NULL",
+			"$$1->setSize('100%'); //px",
+			"//$$1->placeholder = 'Digite aqui a descrição';",
+        	"//$$1->setTip('Digite aqui a descrição');",
+			"//$$1->setEditable(FALSE);", // Desabilita a edição do campo
+			"//$$1->addValidation('$1', new TRequiredValidator);", // Passa um vetor para auto completar
+        	"$$row = $$this->form->addFields( [ new TLabel('$1') , $$1 ] );",
+			"$$row->layout = [ 'col-sm-12'];"
+		],
+		"description": "TDBEntry('name', 'database', 'model', 'value')"
+	},
+	"TDBMultiSearch (Full)": {
+		"prefix": "TDBMultiSearch (Full)",
+		"body": [
+			"$${1:name} = new TDBMultiSearch('${1:name}', '${2:database}', '${3:model}', '${4:key}', '${5:value}', '$5'); //TCriteria $criteria = NULL",
+			"$$1->setMask('{$5}'); // Máscara de exibição",
+			"$$1->setSize('100%'); //px",
+        	"//$$1->setTip('Selecione as opções');",
+			"//$$1->setEditable(FALSE);", // Desabilita a edição do campo
+			"//$$1->addValidation('$1', new TRequiredValidator);", // Passa um vetor para auto completar
+        	"$$row = $$this->form->addFields( [ new TLabel('$1') , $$1 ] );",
+			"$$row->layout = [ 'col-sm-12'];"
+		],
+		"description": "TDBMultiSearch('name', 'database', 'model', 'key', 'value')"
+	},
+	"TDBRadioGroup (Full)": {
+		"prefix": "TDBRadioGroup (Full)",
+		"body": [
+			"$${1:name} = new TDBRadioGroup('${1:name}', '${2:database}', '${3:model}', '${4:key}', '${5:value}', '$5'); //TCriteria $criteria = NULL",
+			"$$1->setMask('{$5}'); // Máscara de exibição",
+        	"//$$1->setTip('Selecione uma opção');",
+			"//$$1->setEditable(FALSE);", // Desabilita a edição do campo
+			"//$$1->addValidation('$1', new TRequiredValidator);", // Passa um vetor para auto completar
+			"$$1->setSize('100%'); //px",
+        	"$$row = $$this->form->addFields( [ new TLabel('$1') , $$1 ] );",
+			"$$row->layout = [ 'col-sm-12'];"
+		],
+		"description": "TDBRadioGroup('name', 'database', 'model', 'key', 'value')"
+	},
+	"TDBSelect (Full)": {
+		"prefix": "TDBSelect (Full)",
+		"body": [
+			"$${1:name} = new TDBSelect('${1:name}', '${2:database}', '${3:model}', '${4:key}', '${5:value}', '$5') //TCriteria $criteria = NULL",
+			"$$1->setValue(['1']); //vetor",
+			"$$1->setMask('{$5}'); // Máscara de exibição",
+        	"//$$1->setTip('Selecione uma opção');",
+			"//$$1->setEditable(FALSE);", // Desabilita a edição do campo
+			"//$$1->addValidation('$1', new TRequiredValidator);", // Passa um vetor para auto completar
+			"$$1->setSize('100%'); //px",
+        	"$$row = $$this->form->addFields( [ new TLabel('$1') , $$1 ] );",
+			"$$row->layout = [ 'col-sm-12'];"
+		],
+		"description": "TDBSelect('name', 'database', 'model', 'key', 'value')"
+	},
+	"TDBSortList (Full)": {
+		"prefix": "TDBSortList (Full)",
+		"body": [
+			"$${1:name} = new TDBSortList('${1:name}', '${2:database}', '${3:model}', '${4:key}', '${5:value}', '$5') //TCriteria $criteria = NULL",
+			"$$1->setSize(200,100); //px",
+        	"//$$1->setTip('Selecione uma opção');",
+			"//$$1->setEditable(FALSE);", // Desabilita a edição do campo
+			"//$$1->addValidation('$1', new TRequiredValidator);", // Passa um vetor para auto completar
+        	"$$row = $$this->form->addFields( [ new TLabel('$1') , $$1 ] );",
+			"$$row->layout = [ 'col-sm-12'];"
+		],
+		"description": "TDBSortList('name', 'database', 'model', 'key', 'value')"
+	},
+	"TDBSortListConnected (Full)": {
+		"prefix": "TDBSortListConnected (Full)",
+		"body": [
+			"$${1:name_list1} = new TDBSortList('$1', '${2:database}', '${3:model}', '${4:key}', '${5:value}') //TCriteria $criteria = NULL",
+			"$${6:name_list2} = new TDBSortList('$6', '${2:database}', '${7:model}', '${4:key}', '${5:value}') //TCriteria $criteria = NULL",
+			"$$1->setSize(200,100); //px",
+			"$$6->setSize(200,100); //px",
+			"//$$1->setTip('Digite aqui a descrição');",
+			"//$$6->setTip('Digite aqui a descrição');",
+			"//$$1->setEditable(FALSE);", // Desabilita a edição do campo
+			"//$$1->addValidation('$1', new TRequiredValidator);", // Passa um vetor para auto completar
+			"// Conectar Listas",
+			"$$1->connectList($$6);",
+			"$$6->connectList($$1);",
+        	"$$row = $$this->form->addFields( [ new TLabel('$1') , $$1 ], [ new TLabel('$6') , $$6 ] );",
+			"$$row->layout = [ 'col-sm-6','col-sm-6'];"
+		],
+		"description": "TDBSortList('name', 'database', 'model', 'key', 'value')"
+	},
+	"TDBSeekButton (Full)": {
+		"prefix": "TDBSeekButton (Full)",
+		"body": [
+			"$${1:name} = new TDBSeekButton('${1:name}', '${2:database}', '${3:form}', '${4:model}', '${5:display_field}', ${6:receive_key} = null, ${7:receive_display_field} = null); //TCriteria $criteria = NULL",
+			"$$1->setSize('100%'); //px",
+        	"//$$1->setTip('Selecione uma opção');",
+			"//$$1->setEditable(FALSE);", // Desabilita a edição do campo
+			"//$$1->addValidation('$1', new TRequiredValidator);", // Passa um vetor para auto completar
+        	"$$row = $$this->form->addFields( [ new TLabel('$1') , $$1 ] );",
+			"$$row->layout = [ 'col-sm-12'];"
+		],
+		"description": "TDBSeekButton('name', 'database', 'model', 'key', 'value')"
+	},
+	
+	// Containers Fonte https://github.com/delphicleancode/AdiantiPHPVsCodeSnippets/
+	"TVBox ": {
+		"scope": "PHP,php",
+		"prefix": "newTVBox",
+		"body": ["$$1 = new TVBox;",
+				"$$1->style = 'width: 100%';",
+				"$$1->add( $$2);"],
+		"description": "New TVBox"
+	},
+	"THBox ": {
+		"scope": "PHP,php",
+		"prefix": "newTHBox",
+		"body": ["$$1 = new THBox;",
+				"$$1->style = 'width: 100%';",
+				"$$1->add( $$2);"],
+		"description": "New TVBox"
+	},
+	// End Containers
+	// TSession
+	"TSession Get ": {
+		"scope": "PHP,php",
+		"prefix": "getTSession",
+		"body": ["$$1 = TSession::getValue('$2'); //userid, userunitid, login, logged, usergroupids, userunitids, username, usermail, frontpage, programs"],
+		"description": "Session Get"
+	},
+	"TSession Set ": {
+		"scope": "PHP,php",
+		"prefix": "setTSession",
+		"body": ["TSession::setValue('$1', $$2);//userid, userunitid, login, logged, usergroupids, userunitids, username, usermail, frontpage, programs"],
+		"description": "Set Session"
+	},
+	"TButtonTAction ": {
+		"prefix": "TButton_TAction",
+		"body": ["$$btn$1 = new TButton('btn$1');",
+			"$$btn$1->setAction(new TAction([$$this, '$1']), \"TButton\");",
+			"$$btn$1>addStyleClass('btn-default');",
+			"$$btn$1->setImage('fas:$2');//search",
+			"$$row = $$this->form->addFields([$$btn$1]); //pode adicionar ao lado de um campo existente"],
+		"description": "Botão com ação"
+	},
+	//End Field Types 
+
+	//Validators
+	"TValidator MinLength":{
+
+		"prefix": "Tvalidator MinLength",
+		"body": [
+		"$${1:field}->addValidation('${2:fieldname}', new TMinLengthValidator, array(3));// cannot be less the 3 characters"
+		],
+		"description": "MinLengthValidator"
+
+	},
+	"TValidator CNPJ":{
+
+		"prefix": "Tvalidator CNPJ",
+		"body": [
+		"$${1:field}->addValidation('${2:fieldname}', new TCNPJValidator);//Cnpj validator"
+		],
+		"description": "TCNPJValidator"
+
+	},
+	"TValidator CPF":{
+
+		"prefix": "Tvalidator CPF",
+		"body": [
+		"$${1:field}->addValidation('${2:fieldname}', new TCPFValidator);// CPF validator"
+		],
+		"description": "TCPFValidator"
+
+	},
+	"TValidator Email":{
+
+		"prefix": "Tvalidator Email",
+		"body": [
+		"$${1:field}->addValidation('${2:fieldname}', new TEmailValidator);// Email validator"
+		],
+		"description": "TEmailValidator"
+
+	},
+	"TValidator Require":{
+
+		"prefix": "Tvalidator Require",
+		"body": [
+		"$${1:field}->addValidation('${2:fieldname}', new TRequiredValidator);//Require field validator"
+		],
+		"description": "TRequiredValidator"
+
+	}
+	,
+	"TValidator MaxLength":{
+
+		"prefix": "Tvalidator MaxLength",
+		"body": [
+		"$${1:field}->addValidation('${2:fieldname}', new TMaxLengthValidator, array(3));// cannot be greater the 3 characters"
+		],
+		"description": "TMaxLengthValidator"
+
+	},
+	"TValidator MaxValue":{
+
+		"prefix": "Tvalidator MaxValue",
+		"body": [
+		"$${1:field}->addValidation('${2:fieldname}', new TMaxValueValidator, array(3));// cannot be greater the 3"
+		],
+		"description": "TMaxValueValidator"
+
+	},
+	"TValidator MinValue":{
+
+		"prefix": "Tvalidator MinValue",
+		"body": [
+		"$${1:field}->addValidation('${2:fieldname}', new TMinValueValidator, array(3));// cannot be less the 3"
+		],
+		"description": "TMinValueValidator"
+
+	},
+	"TValidator Numeric":{
+
+		"prefix": "Tvalidator NumericValidator",
+		"body": [
+		"$${1:field}->addValidation('${2:fieldname}', new TNumericValidator);// Numeric only validator"
+		],
+		"description": "TNumericValidator"
+
+	},
+	"TValidator Required List Validator":{
+
+		"prefix": "Tvalidator RequiredListValidator",
+		"body": [
+		"$${1:field}->addValidation('${2:fieldname}', new TRequiredListValidator);// fild required in list"
+		],
+		"description": "TRequiredListValidator"
+
+	},
+	//END Validators
+
+
+
+
+
+
+	//MODEL
+	"TModel":{
+		"prefix": "TModel",
+		"body": [
+			"<?php",
+			"class ${1:Model} extends TRecord",
+			"{",
+			"    const TABLENAME = '${2:Table}';",
+			"    const PRIMARYKEY= 'id';",
+			"    const IDPOLICY =  'serial'; // {max, serial}",
+			"",
+			"",
+			"    public function __construct($$id = NULL, $$callObjectLoad = TRUE)",
+			"    {",
+			"        parent::__construct($$id, $$callObjectLoad);",
+			"    }",
+			"}",
+			"?>"
+		],
+		"description": "TRequiredListValidator"
+
+	},
+	"TModel Get Set": {
+		"prefix": "Get Set (model)",
+		"body": [
+			"private $${1:nameAttr};",
+			"/**",
+			"* Method set_$1",
+			"* Sample of usage: $$vinculo->$1 = $$object;",
+			"* @param $$object Instance of ${2:model}",
+			"*/",
+			"public function set_$1(${2:model} $$object)",
+			"{",
+			"    $$this->$1 = $$object;",
+			"    $$this->$1_id = $$object->id;",
+			"}",
+			"",
+			"/**",
+			"* Method get_$1",
+			"* Sample of usage: $$vinculo->$1->attribute;",
+			"* @returns ${2:model} instance",
+			"*/",
+			"public function get_$1()",
+			"{",
+			"    // loads the associated object",
+			"    if (empty($$this->$1))",
+			"        $$this->$1 = new ${2:model}($$this->$1_id);",
+			"",
+			"    // returns the associated object",
+			"    return $$this->$1;",
+			"}"
+		],
+		"description": "Create a Model TRecord"
+	},
+	"TModel addAttribute": {
+		"prefix": "addAttribute (model)",
+		"body": [
+			"parent::addAttribute('${1:FieldName}');"
+		],
+		"description": "Create a addAttribute to TRecord"
+	},
+	//END Model
+}
